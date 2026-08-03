@@ -70,8 +70,23 @@ two `platformio.ini` tooling issues unrelated to the config selection
 (dead `trinamic/TMC26XStepper` GitHub link, old numeric `lib_ldf_mode`
 value) - the same fixes already applied in `mini1-marlin-2x/`.
 
-No BLTouch config has been added yet - tracked as follow-up work in the
-same session; see the umbrella `PROJECT.md` in the `lulzbot-marlin-bltouch`
+BLTouch config has been added (commit `7a05509`), gated behind
+`LULZBOT_USE_BLTOUCH` in `Configuration_LulzBot.h` so the stock config
+remains buildable by commenting that flag out. Build-verified both ways:
+BLTouch enabled (Flash 64.5%, RAM 68.4%) and stock/disabled (Flash 63.6%,
+RAM 66.1%, matching the prior stock-only build exactly).
+
+**Not flash-tested on real hardware.** The BLTouch's trigger/alarm wire
+is mapped to pin 30 (this printer's physical Z-max pin, otherwise
+unused) and its servo/control wire to pin 22 (`SERVO0_PIN`, the RAMBo
+board default) - this pin assignment is an **unconfirmed placeholder**,
+not verified against the actual physical wiring. Also left as explicit
+hardware-calibration TODOs: Z probe offset (-1.0 placeholder, stock
+-1.200 was calibrated for the bed-washer probe), X/Y probe offset (0,0,
+unconfirmed for the BLTouch mount), and the Z-safe-homing point
+(inherited -19/258 from the old home button, not re-verified for probe
+clearance). See commit `7a05509`'s message for the full technical
+rationale, and the umbrella `PROJECT.md` in the `lulzbot-marlin-bltouch`
 workspace folder for goals, background, and open questions across all
 repos in this fleet.
 
