@@ -55,18 +55,25 @@ The physical toolhead is Titan-Aero-based and not the stock TAZ 6 head,
 but has no visible markings to confirm v1 vs v2. This source's only
 TAZ-specific "Aero v1"-style option, `TOOLHEAD_Angelfish_Aerostruder`, is
 explicitly commented `// Prototype Aero for TAZ` in
-`Conditionals_LulzBot.h` - prototype-labeled code was ruled out. The
-intended choice is `TOOLHEAD_CecropiaSilk_SingleExtruderAeroV2`, the
-non-prototype universal SE/Aero toolhead (same E3D Titan Aero V6 block),
-already used on the Workhorse build.
+`Conditionals_LulzBot.h` - prototype-labeled code was ruled out. Selected
+instead: `TOOLHEAD_CecropiaSilk_SingleExtruderAeroV2`, the non-prototype
+universal SE/Aero toolhead (same E3D Titan Aero V6 block), already used
+on the Workhorse build.
 
 ## Current state
 
-This is currently a **stock, unmodified 2.0.0.144 checkout** - no printer
-model, toolhead, or BLTouch config has been selected/added yet. That's
-tracked as follow-up work in the same session; see the umbrella
-`PROJECT.md` in the `lulzbot-marlin-bltouch` workspace folder for goals,
-background, and open questions across all repos in this fleet.
+Printer model and toolhead are selected in `Marlin/Configuration_LulzBot.h`
+(`LULZBOT_Oliveoil_TAZ6` / `TOOLHEAD_CecropiaSilk_SingleExtruderAeroV2`,
+commit `2d4b3d0`) and **build-verified**: `pio run -e rambo` succeeds,
+`firmware.hex` produced (Flash 63.6%, RAM 66.1%). That commit also fixed
+two `platformio.ini` tooling issues unrelated to the config selection
+(dead `trinamic/TMC26XStepper` GitHub link, old numeric `lib_ldf_mode`
+value) - the same fixes already applied in `mini1-marlin-2x/`.
+
+No BLTouch config has been added yet - tracked as follow-up work in the
+same session; see the umbrella `PROJECT.md` in the `lulzbot-marlin-bltouch`
+workspace folder for goals, background, and open questions across all
+repos in this fleet.
 
 # Safety and warnings:
 
