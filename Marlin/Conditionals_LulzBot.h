@@ -977,9 +977,21 @@
         LULZBOT_XLEVEL_POS       /* Center axis */ \
         "G28 Z0\n"               /* Home Axis */ \
         "M117 Leveling done.\n"  /* Set LCD status */
-#else
-    #define LULZBOT_MENU_AXIS_LEVELING_COMMANDS ""
 #endif
+// Project fix (not upstream LulzBot): the stock #else branch here used
+// to unconditionally #define LULZBOT_MENU_AXIS_LEVELING_COMMANDS "" (an
+// empty string) for every non-Z-belt printer, including Oliveoil_TAZ6.
+// menu_motion.cpp's "Level X axis" LCD entry is gated on
+// "#if defined(LULZBOT_MENU_AXIS_LEVELING_COMMANDS)", which is true even
+// for an empty-string definition - so stock TAZ 6 (Z-screw, not Z-belt)
+// showed a "Level X axis" button that ran an empty g-code list and did
+// nothing. Leaving the macro undefined entirely (removing the #else)
+// correctly hides that dead menu item; confirmed the only other two
+// uses of this macro (LULZBOT_CALIBRATION_SCRIPT, gated on
+// LULZBOT_CALIBRATION_GCODE which Oliveoil_TAZ6 doesn't define; and
+// LULZBOT_G29_RECOVER_COMMANDS, gated on LULZBOT_USE_Z_BELT) are both
+// unreachable for this printer, so nothing else depends on it being
+// defined.
 
 #if defined(LULZBOT_USE_Z_SCREW)
     // The older Minis seem succeptible to noise in the probe lines.
@@ -2453,7 +2465,17 @@
     #define LULZBOT_HIDE_EXTRA_FAN_CONFIG_IN_LCD
     #define LULZBOT_HIDE_PREHEAT_CHOICES
     #define LULZBOT_HIDE_INITIALIZE_EEPROM
-    #define LULZBOT_NO_BED_LEVELING_IN_LCD
+    // Project addition (not upstream LulzBot): stock LulzBot hides
+    // "Level Bed" from the LCD on every REPRAP_LCD_DISPLAY printer
+    // (likely because the old electrical bed-washer probe's slow
+    // contact-and-retract cycle made it impractical to trigger
+    // casually from the LCD). BLTouch is fast enough that this no
+    // longer applies, so it's re-enabled for the BLTouch build only -
+    // the stock (non-BLTouch) config keeps the original hidden
+    // behavior unchanged.
+    #if !defined(LULZBOT_USE_BLTOUCH)
+        #define LULZBOT_NO_BED_LEVELING_IN_LCD
+    #endif
     #define LULZBOT_PRECISION_ZOFFSET ftostr52
     #define LULZBOT_LCD_SET_PROGRESS_MANUALLY
     #define LULZBOT_SCROLL_LONG_FILENAMES
