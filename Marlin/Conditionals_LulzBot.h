@@ -672,13 +672,46 @@
     #define LULZBOT_HOMING_FEEDRATE_Z               (3*60) // mm/m
 #endif // LULZBOT_TAZ_BED
 
-#if defined(LULZBOT_BED_WASHERS_PIN)
+#if defined(LULZBOT_BED_WASHERS_PIN) && !defined(LULZBOT_USE_BLTOUCH)
     // On the TAZ 6, the bed washers are on Z_MIN_PROBE while the
     // Z-Home button is on Z_MIN, yet we need both to be disabled
     // when z_probe_enabled is false. We added this special case
     // to "endstops.cpp"
     #define LULZBOT_Z_MIN_USES_Z_PROBE_ENABLED
     #define LULZBOT_Z_MIN_PROBE_PIN LULZBOT_BED_WASHERS_PIN
+
+#elif defined(LULZBOT_USE_BLTOUCH)
+    // Project addition (not upstream LulzBot): the stock electrical
+    // bed-washer probe above (LULZBOT_BED_WASHERS_PIN = SERVO0_PIN,
+    // pin 22, RAMBo "Motor header MX1") has been replaced with a
+    // BLTouch. SERVO0_PIN itself is left at its board default (pin 22)
+    // since that's the pin Marlin's servo code actually drives for the
+    // BLTouch's PWM deploy/stow control line - pins_RAMBO.h defines
+    // SERVO0_PIN unconditionally and loads after this file, so an
+    // override here would just be silently clobbered. The BLTouch's
+    // separate trigger/alarm signal line therefore needs a different
+    // pin: the physical Z-max pin (30) is otherwise unused on this
+    // printer (LULZBOT_USE_ZMAX_PLUG isn't set when
+    // LULZBOT_USE_HOME_BUTTON is defined - see below), so it's
+    // repurposed here, mirroring how the Mini 1 BLTouch build reused
+    // its own freed Z-max pin.
+    //
+    // Deliberately the literal number 30, NOT the Z_MAX_PIN symbol:
+    // Marlin/src/pins/pins.h unconditionally does
+    // "#if DISABLED(USE_ZMAX_PLUG) #undef Z_MAX_PIN #define Z_MAX_PIN -1"
+    // to null out unused endstop pins, which would silently clobber a
+    // reference to the Z_MAX_PIN macro itself (confirmed by compiling -
+    // this was the actual cause of a "Z_MIN_PROBE_PIN must be defined"
+    // build failure before switching to the raw number).
+    //
+    // TODO(hardware): UNCONFIRMED. This printer's BLTouch wiring has
+    // not been physically verified. Before ever flashing, homing, or
+    // probing on real hardware, confirm the trigger/alarm wire is
+    // actually on pin 30 and the servo/control wire is actually on
+    // pin 22 (SERVO0_PIN) - if the real wiring differs, both this
+    // define and the physical connections need to be reconciled first.
+    #define LULZBOT_Z_MIN_USES_Z_PROBE_ENABLED
+    #define LULZBOT_Z_MIN_PROBE_PIN 30
 
 #else
     // The Mini and TAZ Pro lack a home button and probe using the Z_MIN pin.
@@ -789,14 +822,31 @@
 #if defined(LULZBOT_USE_AUTOLEVELING)
     #define LULZBOT_RESTORE_LEVELING_AFTER_G28
     #define LULZBOT_NOZZLE_CLEAN_FEATURE
-    #define LULZBOT_AUTO_BED_LEVELING_LINEAR
+    #if defined(LULZBOT_USE_BLTOUCH)
+        // The stock 2x2 grid below is a compromise forced by the old
+        // electrical bed-washer probe's slow, imprecise contact cycle -
+        // not a deliberate accuracy choice. BLTouch is fast enough that
+        // a real interpolated mesh is practical.
+        #define LULZBOT_AUTO_BED_LEVELING_BILINEAR
+    #else
+        #define LULZBOT_AUTO_BED_LEVELING_LINEAR
+    #endif
 #endif
 
-#if defined(LULZBOT_AUTO_BED_LEVELING_LINEAR)
-  // Traditionally LulzBot printers have employed a four-point leveling
-  // using a degenerate 2x2 grid. This is the traditional behavior.
-  #define LULZBOT_GRID_MAX_POINTS_X            2
-  #define LULZBOT_GRID_MAX_POINTS_Y            2
+#if defined(LULZBOT_AUTO_BED_LEVELING_LINEAR) || defined(LULZBOT_AUTO_BED_LEVELING_BILINEAR)
+  #if defined(LULZBOT_AUTO_BED_LEVELING_BILINEAR)
+    // Real multi-point mesh, made practical by the BLTouch. 5x5 is a
+    // reasonable starting grid, not a calibrated-precise number -
+    // GRID_MAX_POINTS_X/Y can go up to 15 if tuning on hardware shows
+    // a finer mesh is worthwhile.
+    #define LULZBOT_GRID_MAX_POINTS_X            5
+    #define LULZBOT_GRID_MAX_POINTS_Y            5
+  #else
+    // Traditionally LulzBot printers have employed a four-point leveling
+    // using a degenerate 2x2 grid. This is the traditional behavior.
+    #define LULZBOT_GRID_MAX_POINTS_X            2
+    #define LULZBOT_GRID_MAX_POINTS_Y            2
+  #endif
   #if defined(LULZBOT_IS_MINI)
     // We can't control the order of probe points exactly, but
     // this makes the probe start closer to the wiper pad.
@@ -827,11 +877,34 @@
  * named Z_MIN_PROBE in Marlin. The Z-Home switch
  * is called Z_MIN_ENDSTOP
  */
-#if defined(LULZBOT_USE_AUTOLEVELING)
+#if defined(LULZBOT_USE_AUTOLEVELING) && !defined(LULZBOT_USE_BLTOUCH)
     #define LULZBOT_FIX_MOUNTED_PROBE
 #endif // LULZBOT_USE_AUTOLEVELING
 
+#if defined(LULZBOT_USE_BLTOUCH)
+    #define LULZBOT_BLTOUCH
+    #define LULZBOT_BLTOUCH_DELAY                375
+    // NUM_SERVOS/SERVO_DELAY in Configuration.h indirect unconditionally
+    // to these LULZBOT_* macros, which aren't otherwise defined for
+    // Oliveoil_TAZ6 - must be set explicitly here or the build fails on
+    // an undefined array size.
+    #define LULZBOT_NUM_SERVOS                     1
+    #define LULZBOT_SERVO_DELAY                  { 50 }
+    // TODO(hardware): -1.200 (the stock TAZ 6 default) is calibrated
+    // for the electrical bed-washer probe's trigger height, not a
+    // BLTouch's. This placeholder MUST be replaced with a real G29/M851
+    // measurement on the actual printer before trusting a print.
+    #define LULZBOT_Z_PROBE_OFFSET_FROM_EXTRUDER -1.0
+#endif // LULZBOT_USE_BLTOUCH
+
 #define LULZBOT_MULTIPLE_PROBING              2
+// TODO(hardware): 0,0 assumes the probe is directly under the nozzle in
+// X/Y. Unverified for the BLTouch mount - if it physically offsets the
+// probe tip from the nozzle (typical for BLTouch mounts), these need
+// real measurement, and LULZBOT_Z_SAFE_HOMING_X/Y_POINT (currently
+// inherited unchanged from the stock home-button values, -19/258) may
+// also need re-tuning for probe clearance once BLTouch is tested on
+// real hardware.
 #define LULZBOT_X_PROBE_OFFSET_FROM_EXTRUDER  0
 #define LULZBOT_Y_PROBE_OFFSET_FROM_EXTRUDER  0
 #define LULZBOT_Z_PROBE_OFFSET_RANGE_MIN      -2
@@ -2118,7 +2191,13 @@
 
 /******************************** PROBE QUALITY CHECK *************************/
 
-#if defined(LULZBOT_USE_AUTOLEVELING)
+// This diagnostic is a plane-fit check specific to the traditional
+// 4-point (2x2) LINEAR grid - it doesn't apply to BILINEAR (a real
+// mesh has no single "plane" to check distance from, bp[4] is sized
+// for the wrong point count, and vector_3 isn't even declared when
+// ABL_PLANAR is false), so it must stay disabled for the BLTouch/
+// BILINEAR case - same fix already needed and applied in mini1-marlin-2x.
+#if defined(LULZBOT_USE_AUTOLEVELING) && defined(LULZBOT_AUTO_BED_LEVELING_LINEAR)
     #define LULZBOT_BED_LEVELING_DECL vector_3 bp[4];
     #define LULZBOT_BED_LEVELING_POINT(i,x,y,z) bp[i] = vector_3(x,y,z);
     #define LULZBOT_BED_LEVELING_SUMMARY \

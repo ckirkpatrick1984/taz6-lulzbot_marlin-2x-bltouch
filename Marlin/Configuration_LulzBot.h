@@ -48,4 +48,10 @@
 #define LULZBOT_Oliveoil_TAZ6
 #define TOOLHEAD_CecropiaSilk_SingleExtruderAeroV2
 
+// Project addition (not upstream LulzBot): this printer's stock
+// electrical bed-washer probe has been replaced with a BLTouch.
+// Comment this out to build the stock, unmodified Oliveoil_TAZ6
+// configuration instead.
+#define LULZBOT_USE_BLTOUCH
+
 #endif /* CONFIGURATION_LULZBOT */
