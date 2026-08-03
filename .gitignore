@@ -1,0 +1,5 @@
+.pioenvs/
+.piolibdeps/
+.pio/
+firmware.hex
+.DS_Store
