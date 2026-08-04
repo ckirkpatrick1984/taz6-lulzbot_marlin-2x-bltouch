@@ -712,22 +712,24 @@
     // via the BLTouch probe, so Z_SAFE_HOMING is still required (XY must
     // be at a safe, reachable point over the bed before Z homes).
     //
-    // X/Y set to (140,140) - the physical center of the bed in machine
-    // coordinates (X_BED_SIZE/Y_BED_SIZE are both 280, BED_CENTER_AT_0_0
-    // is not defined, so the bed surface occupies machine X=[0,280],
-    // Y=[0,280]; the extra travel out to X_MIN_POS=-20/X_MAX_POS=300/
-    // Y_MAX_POS=303 is wipe/clearance area beyond the bed, not part of
-    // it). Z_SAFE_HOMING_X/Y_POINT is where the *probe* ends up, not the
+    // X/Y set to X_CENTER/Y_CENTER - Marlin's own built-in bed-center
+    // macros (src/inc/Conditionals_post.h), not a LulzBot-specific
+    // number. This is deliberately Marlin's stock/default Z_SAFE_HOMING
+    // behavior when nothing overrides it (see that same file's
+    // "#ifndef Z_SAFE_HOMING_X_POINT ... _SAFE_POINT(X) ... A_CENTER"
+    // fallback) - using the named macro instead of a hardcoded 140,140
+    // self-adjusts if bed size config ever changes, and matches "stock
+    // BLTouch behavior" rather than a TAZ6-specific override.
+    // Z_SAFE_HOMING_X/Y_POINT is where the *probe* ends up, not the
     // nozzle - Marlin's home_z_safely() (G28.cpp) subtracts
     // LULZBOT_X/Y_PROBE_OFFSET_FROM_EXTRUDER below to compute the actual
     // nozzle move, so setting this straight to bed center is sufficient
     // to land the BLTouch there on every Z home (G28 or G28 Z).
     //
-    // TODO(hardware): user-measured, NOT yet flash-tested on real
-    // hardware.
+    // TODO(hardware): NOT yet flash-tested on real hardware.
     #define LULZBOT_Z_SAFE_HOMING
-    #define LULZBOT_Z_SAFE_HOMING_X_POINT         (140)
-    #define LULZBOT_Z_SAFE_HOMING_Y_POINT         (140)
+    #define LULZBOT_Z_SAFE_HOMING_X_POINT         X_CENTER
+    #define LULZBOT_Z_SAFE_HOMING_Y_POINT         Y_CENTER
     #define LULZBOT_Z_HOMING_HEIGHT               5
 #elif defined(LULZBOT_Juniper_TAZ5)
     // TAZ 5 safe homing position so fan duct does not hit.
@@ -879,11 +881,17 @@
     // We can't control the order of probe points exactly, but
     // this makes the probe start closer to the wiper pad.
     #define LULZBOT_PROBE_Y_FIRST
-  #else
+  #elif !defined(LULZBOT_USE_BLTOUCH)
     // Restore the old probe sequence on the TAZ that starts
     // probing on the washer underneath the wiper pad.
     #define LULZBOT_LAST_PROBE_POINT_ON_BACK_LEFT_CORNER
   #endif
+  // Project note: LULZBOT_LAST_PROBE_POINT_ON_BACK_LEFT_CORNER is a
+  // TAZ6-stock-specific reordering of G29.cpp's probe traversal (see
+  // that file's use of this exact macro), tuned for the old washer
+  // probe under the wiper pad - not applicable with a BLTouch. Left
+  // disabled for LULZBOT_USE_BLTOUCH so the grid uses Marlin's own
+  // default zigzag order instead of this TAZ-specific override.
 #endif
 
 /* Make sure Marlin allows probe points outside of the bed area */
