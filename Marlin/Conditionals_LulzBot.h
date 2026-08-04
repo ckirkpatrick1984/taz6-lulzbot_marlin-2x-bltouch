@@ -710,13 +710,24 @@
     // Project note: the physical home button is gone on this build (see
     // the Z_MIN_PROBE_PIN block above), but Z still needs to home down
     // via the BLTouch probe, so Z_SAFE_HOMING is still required (XY must
-    // be at a safe, reachable point over the bed before Z homes). Same
-    // X/Y point inherited from the old home-button config as a starting
-    // placeholder - TODO(hardware): not yet re-verified for BLTouch
-    // probe clearance specifically.
+    // be at a safe, reachable point over the bed before Z homes).
+    //
+    // X/Y set to (140,140) - the physical center of the bed in machine
+    // coordinates (X_BED_SIZE/Y_BED_SIZE are both 280, BED_CENTER_AT_0_0
+    // is not defined, so the bed surface occupies machine X=[0,280],
+    // Y=[0,280]; the extra travel out to X_MIN_POS=-20/X_MAX_POS=300/
+    // Y_MAX_POS=303 is wipe/clearance area beyond the bed, not part of
+    // it). Z_SAFE_HOMING_X/Y_POINT is where the *probe* ends up, not the
+    // nozzle - Marlin's home_z_safely() (G28.cpp) subtracts
+    // LULZBOT_X/Y_PROBE_OFFSET_FROM_EXTRUDER below to compute the actual
+    // nozzle move, so setting this straight to bed center is sufficient
+    // to land the BLTouch there on every Z home (G28 or G28 Z).
+    //
+    // TODO(hardware): user-measured, NOT yet flash-tested on real
+    // hardware.
     #define LULZBOT_Z_SAFE_HOMING
-    #define LULZBOT_Z_SAFE_HOMING_X_POINT         (-19)
-    #define LULZBOT_Z_SAFE_HOMING_Y_POINT         (258)
+    #define LULZBOT_Z_SAFE_HOMING_X_POINT         (140)
+    #define LULZBOT_Z_SAFE_HOMING_Y_POINT         (140)
     #define LULZBOT_Z_HOMING_HEIGHT               5
 #elif defined(LULZBOT_Juniper_TAZ5)
     // TAZ 5 safe homing position so fan duct does not hit.
@@ -892,18 +903,35 @@
     // BLTouch's. This placeholder MUST be replaced with a real G29/M851
     // measurement on the actual printer before trusting a print.
     #define LULZBOT_Z_PROBE_OFFSET_FROM_EXTRUDER -1.0
+    // User-measured BLTouch-to-nozzle offset: BLTouch is ~3.7mm left of
+    // and ~46.4mm in front of the nozzle (facing the printer's front).
+    // X_PROBE_OFFSET_FROM_EXTRUDER is "-left +right", Y is "-front
+    // +behind" (see the comment in Configuration.h), so both are
+    // negative. Rounded to the nearest integer millimeter -
+    // X/Y_PROBE_OFFSET_FROM_EXTRUDER must be integers (see
+    // SanityCheck.h's FLOOR(x)==x static_assert) - up to ~0.5mm of
+    // placement error versus the raw measurement is expected as a
+    // result. Scoped to this LULZBOT_USE_BLTOUCH block specifically
+    // (not the unconditional default below) since this offset is
+    // physical-mount-specific to the BLTouch, not the stock bed-washer
+    // probe, which has no offset (the nozzle itself is the probe).
+    // TODO(hardware): user-measured, NOT yet flash-tested on real
+    // hardware.
+    #define LULZBOT_X_PROBE_OFFSET_FROM_EXTRUDER -4
+    #define LULZBOT_Y_PROBE_OFFSET_FROM_EXTRUDER -46
 #endif // LULZBOT_USE_BLTOUCH
 
 #define LULZBOT_MULTIPLE_PROBING              2
-// TODO(hardware): 0,0 assumes the probe is directly under the nozzle in
-// X/Y. Unverified for the BLTouch mount - if it physically offsets the
-// probe tip from the nozzle (typical for BLTouch mounts), these need
-// real measurement, and LULZBOT_Z_SAFE_HOMING_X/Y_POINT (currently
-// inherited unchanged from the stock home-button values, -19/258) may
-// also need re-tuning for probe clearance once BLTouch is tested on
-// real hardware.
-#define LULZBOT_X_PROBE_OFFSET_FROM_EXTRUDER  0
-#define LULZBOT_Y_PROBE_OFFSET_FROM_EXTRUDER  0
+// Default: probe directly under the nozzle in X/Y. Correct for the
+// stock electrical bed-washer probe (the nozzle itself is the probe -
+// no physical offset), and used as a fallback for any build that
+// doesn't define its own measured offset above.
+#if !defined(LULZBOT_X_PROBE_OFFSET_FROM_EXTRUDER)
+    #define LULZBOT_X_PROBE_OFFSET_FROM_EXTRUDER  0
+#endif
+#if !defined(LULZBOT_Y_PROBE_OFFSET_FROM_EXTRUDER)
+    #define LULZBOT_Y_PROBE_OFFSET_FROM_EXTRUDER  0
+#endif
 #define LULZBOT_Z_PROBE_OFFSET_RANGE_MIN      -2
 #define LULZBOT_Z_PROBE_OFFSET_RANGE_MAX      5
 #define LULZBOT_XY_PROBE_SPEED                6000
