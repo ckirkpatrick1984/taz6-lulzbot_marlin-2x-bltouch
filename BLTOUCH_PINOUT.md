@@ -165,6 +165,15 @@ between 1.3 and 1.4.
 
 ## Troubleshooting
 
+- **First G29 grid point lands off the physical bed**: fixed in commit
+  `50f1884`. Not a probe-offset sign error (checked, and flipping it
+  would have made things worse) - the grid's LEFT/FRONT corner targets
+  themselves were negative (`-10, -9`), i.e. already outside the bed's
+  real `[0,280]` extent by design, since they were tuned for the old
+  bed-washer probe's external corner washers. Replaced all four grid
+  boundaries with a simple margin inset from the bed's real edges
+  (`LEFT=10, RIGHT=270, FRONT=10, BACK=245`) instead of the old
+  washer-corner positions.
 - **"Level Bed" on the LCD only does a Z-home, no 5x5 grid probing**:
   fixed in commit `c3517a1` - the back edge of the probe grid (291mm)
   was unreachable by the nozzle once the real BLTouch Y offset (probe
