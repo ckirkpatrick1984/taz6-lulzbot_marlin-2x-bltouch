@@ -177,6 +177,15 @@ between 1.3 and 1.4.
   though those have more margin) stays within
   `Y_MAX_POS + Y_PROBE_OFFSET_FROM_EXTRUDER` (currently `303 + (-46) =
   257`).
+- **G29 grid starts/moves toward an unexpected corner**: fixed in
+  commit `950dd9a` - stock TAZ6 firmware has a direct patch to
+  `G29.cpp` (`LULZBOT_LAST_PROBE_POINT_ON_BACK_LEFT_CORNER`) that
+  reorders the probe grid traversal to suit the old washer-probe/wiper-
+  pad workflow. Disabled for the BLTouch build, which now uses Marlin's
+  own default zigzag grid order. Also switched `Z_SAFE_HOMING_X/Y_POINT`
+  from a hardcoded `140,140` to Marlin's own `X_CENTER`/`Y_CENTER`
+  macros (same numeric result, but it's Marlin's actual stock/default
+  behavior rather than a TAZ-specific override).
 - **BLTouch LED solid red, never blinks / no self-test on power-up**:
   check the 3-pin servo/control cable's polarity and that it's on the
   MX1 row, not still on the old bed-washer probe wiring.
