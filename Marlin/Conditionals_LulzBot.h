@@ -827,6 +827,26 @@
     #define LULZBOT_STANDARD_FRONT_PROBE_BED_POSITION      -9
 #endif
 
+#if defined(LULZBOT_USE_BLTOUCH) && defined(LULZBOT_TAZ_BED)
+    // Project fix (not upstream LulzBot): the stock BACK grid boundary
+    // above (291) was set assuming a zero probe offset. With the
+    // BLTouch's real measured offset now applied (46mm *in front of*
+    // the nozzle - see LULZBOT_Y_PROBE_OFFSET_FROM_EXTRUDER below),
+    // reaching that back-right grid corner with the probe would require
+    // the NOZZLE to travel to Y=291-(-46)=337mm - beyond this printer's
+    // actual Y_MAX_POS of 303mm. G29 checks exactly this reachability
+    // for the grid's corners before probing anything (G29.cpp), and
+    // silently aborts with "? (L,R,F,B) out of bounds." on the serial
+    // console if it fails - from the LCD this looks exactly like G29
+    // did nothing after G28's homing move, which is what led to finding
+    // this. Pulled the back boundary in to 250 (comfortably within the
+    // reachable 257mm ceiling = 303 - 46, leaving a small margin for
+    // calibration slop) so the 5x5 grid actually probes instead of
+    // aborting immediately.
+    #undef  LULZBOT_STANDARD_BACK_PROBE_BED_POSITION
+    #define LULZBOT_STANDARD_BACK_PROBE_BED_POSITION      250
+#endif
+
 #if defined(LULZBOT_USE_AUTOLEVELING)
     #define LULZBOT_RESTORE_LEVELING_AFTER_G28
     #define LULZBOT_NOZZLE_CLEAN_FEATURE
