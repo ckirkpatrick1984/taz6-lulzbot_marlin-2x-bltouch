@@ -135,19 +135,26 @@ between 1.3 and 1.4.
    switch if it doesn't stop correctly - this is the highest-risk first
    test, since a wrong probe pin or offset could drive the nozzle into
    the bed.
-4. Once homing works reliably, calibrate the values this firmware left
-   as explicit placeholders (see commit `2af84a3`'s message, and the
-   earlier `7a05509`, for the full list):
-   - **Z probe offset** (`-1.0` placeholder): use `G29`/`M851` to
-     measure the real difference between where the probe triggers and
-     where the nozzle touches the bed, then `M851 Z<value>` and `M500`.
-   - **X/Y probe offset** (`0,0` placeholder): measure how far the
-     probe tip is offset from the nozzle on the physical mount, update
+4. Once homing works reliably, verify/calibrate these values (see
+   commit `0c0f7e1`'s message for the bed-center/offset rationale, and
+   `2af84a3`/`7a05509` for earlier history):
+   - **Z probe offset** (`-1.0` - still an unmeasured placeholder): use
+     `G29`/`M851` to measure the real difference between where the
+     probe triggers and where the nozzle touches the bed, then
+     `M851 Z<value>` and `M500`.
+   - **X/Y probe offset** (`-4, -46` - user-measured from the physical
+     mount, rounded to the nearest integer mm since Marlin requires
+     integer values here): confirm on real hardware that the BLTouch is
+     actually ~4mm left and ~46mm in front of the nozzle as expected: if
+     `G29`/leveling behaves oddly, re-measure and update
      `X_PROBE_OFFSET_FROM_EXTRUDER`/`Y_PROBE_OFFSET_FROM_EXTRUDER` in
      `Marlin/Conditionals_LulzBot.h`, rebuild, reflash.
-   - **Z_SAFE_HOMING X/Y point** (currently `-19, 258`, inherited from
-     the old home-button config): confirm it's a safe, reachable point
-     for the BLTouch specifically, adjust and reflash if not.
+   - **Z_SAFE_HOMING X/Y point** (now `140, 140` - the physical center
+     of the bed in machine coordinates, so the BLTouch lands at bed
+     center on every Z home): confirm this is actually a safe,
+     reachable point for the BLTouch on the real printer (no
+     obstructions, within the printable area) - adjust and reflash if
+     not.
 5. Run a full `G29` bed mesh (LCD: Prepare > Level Bed, now visible for
    this BLTouch build - see `PROJECT.md`) and check the results look
    sane (no wildly outlying points, which usually means a wiring/trigger
