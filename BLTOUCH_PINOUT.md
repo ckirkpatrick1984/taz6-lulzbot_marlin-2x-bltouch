@@ -165,6 +165,18 @@ between 1.3 and 1.4.
 
 ## Troubleshooting
 
+- **"Level Bed" on the LCD only does a Z-home, no 5x5 grid probing**:
+  fixed in commit `c3517a1` - the back edge of the probe grid (291mm)
+  was unreachable by the nozzle once the real BLTouch Y offset (probe
+  46mm in front of the nozzle) was applied, so `G29` aborted instantly
+  on its own reachability check, right after `G28`'s homing move -
+  which from the LCD looked exactly like "only a Z-home happened."
+  Pulled the grid's back boundary in to 250mm. If this recurs after
+  changing the probe offset again, re-check that
+  `LULZBOT_STANDARD_BACK_PROBE_BED_POSITION` (and left/right/front,
+  though those have more margin) stays within
+  `Y_MAX_POS + Y_PROBE_OFFSET_FROM_EXTRUDER` (currently `303 + (-46) =
+  257`).
 - **BLTouch LED solid red, never blinks / no self-test on power-up**:
   check the 3-pin servo/control cable's polarity and that it's on the
   MX1 row, not still on the old bed-washer probe wiring.
