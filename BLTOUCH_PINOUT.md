@@ -1,11 +1,19 @@
 # BLTouch Pinout Instructions - LulzBot TAZ 6 (RAMBo)
 
-**Status: UNCONFIRMED PLACEHOLDER.** This is the wiring the firmware in
-this repo is built to expect (see `Marlin/Conditionals_LulzBot.h`,
-commit `7a05509`), not a wiring that has been physically verified on
-this printer yet. Use this as the target to wire *to*, then verify with
-a multimeter and the bring-up checklist below before trusting it near
-the bed. Do not home or probe on real hardware until it's confirmed.
+See also: [BLTOUCH_PINOUT_SKETCH.svg](BLTOUCH_PINOUT_SKETCH.svg) - a
+labeled board diagram of the same information below.
+
+**Status: cross-verified against official docs, still not physically
+confirmed on this printer.** The pin numbers below match both this
+repo's firmware (`Marlin/Conditionals_LulzBot.h`, commit `7a05509`)
+*and* UltiMachine/RepRap Electro's own RAMBo 1.1B User Manual (pin
+mapping table, p.49 - `D22 = MX1-3`, `D30 = Z-Max/MX3-4`), so the pin
+numbers themselves are solid. What's still unconfirmed is purely
+physical: whether *this specific* v1.3/1.4 board's silkscreen still
+labels these headers "MX1"/"Z-MAX" the same way, and whether the actual
+BLTouch has been wired to match. Verify both with a multimeter and the
+bring-up checklist below before trusting it near the bed. Do not home or
+probe on real hardware until it's confirmed.
 
 ## Safety first
 
@@ -38,9 +46,12 @@ the bed. Do not home or probe on real hardware until it's confirmed.
 | 2-pin sensor/trigger | White = Signal, Black = GND | **Z-MAX endstop header** | `Z_MIN_PROBE_PIN`, Arduino digital pin **30** | Reads the BLTouch's trigger/alarm signal when the probe touches down. Repurposed in firmware from the (unused) Z-max endstop. |
 
 Confirm the exact wire colors against the adapter cable you actually
-have - kits vary. Confirm the "MX1" and "Z-MAX" header locations against
-your board's silkscreen - `pins_RAMBO.h`'s own comments are the source
-for those labels, not a visual inspection of this specific board.
+have - kits vary. The "MX1" and "Z-MAX" header names and pin numbers
+are cross-verified against UltiMachine's official RAMBo 1.1B User
+Manual (pin mapping table, p.49) in addition to `pins_RAMBO.h` - but
+still confirm the header *positions* against your physical v1.3/1.4
+board's silkscreen, since the manual's board photo is from the 1.1B
+revision.
 
 ## Two things to check before connecting
 

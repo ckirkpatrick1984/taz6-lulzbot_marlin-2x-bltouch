@@ -1,0 +1,189 @@
+<svg viewBox="0 0 1100 1500" xmlns="http://www.w3.org/2000/svg" font-family="Helvetica, Arial, sans-serif">
+  <rect x="0" y="0" width="1100" height="1500" fill="#ffffff"/>
+
+  <!-- Title -->
+  <text x="550" y="40" text-anchor="middle" font-size="26" font-weight="bold" fill="#1a1a1a">BLTouch Wiring - RAMBo (TAZ 6), Board Overview</text>
+  <text x="550" y="64" text-anchor="middle" font-size="14" fill="#555">Layout verified against the official RAMBo 1.1B User Manual (UltiMachine / RepRap Electro) and this repo's firmware (pins_RAMBO.h)</text>
+  <text x="550" y="84" text-anchor="middle" font-size="13" fill="#b00020" font-weight="bold">Connector POSITIONS below are traced from official RAMBo docs - CONFIRM against your physical v1.3/1.4 board before wiring.</text>
+
+  <!-- Board outline -->
+  <rect x="130" y="130" width="840" height="560" rx="14" fill="#1f7a3a" stroke="#0d4a20" stroke-width="3"/>
+  <text x="550" y="165" text-anchor="middle" font-size="18" font-weight="bold" fill="#eafff0">RAMBo Control Board</text>
+
+  <!-- Mosfet outputs (top) -->
+  <rect x="170" y="185" width="380" height="40" rx="4" fill="#3a3a3a" stroke="#111"/>
+  <text x="360" y="210" text-anchor="middle" font-size="13" fill="#fff">Mosfet Outputs (Heat0 / Fan0 / Heat1 / Fan1 / Heated-Bed)</text>
+
+  <!-- Power input (right) -->
+  <rect x="850" y="185" width="90" height="120" rx="4" fill="#3a3a3a" stroke="#111"/>
+  <text x="895" y="210" text-anchor="middle" font-size="12" fill="#fff">Power</text>
+  <text x="895" y="225" text-anchor="middle" font-size="12" fill="#fff">Input</text>
+  <text x="895" y="245" text-anchor="middle" font-size="10" fill="#ccc">Bed</text>
+  <text x="895" y="262" text-anchor="middle" font-size="10" fill="#ccc">Mosfets</text>
+  <text x="895" y="279" text-anchor="middle" font-size="10" fill="#ccc">Motors/Logic</text>
+
+  <!-- USB / Reset (left) -->
+  <rect x="170" y="250" width="90" height="60" rx="4" fill="#3a3a3a" stroke="#111"/>
+  <text x="215" y="275" text-anchor="middle" font-size="11" fill="#fff">USB /</text>
+  <text x="215" y="292" text-anchor="middle" font-size="11" fill="#fff">Reset</text>
+
+  <!-- ENDSTOPS BLOCK -->
+  <rect x="170" y="340" width="260" height="150" rx="6" fill="#0f5c25" stroke="#eafff0" stroke-width="1.5"/>
+  <text x="300" y="360" text-anchor="middle" font-size="14" font-weight="bold" fill="#fff">Endstops</text>
+
+  <!-- Min row -->
+  <rect x="185" y="375" width="60" height="34" rx="3" fill="#2a2a2a" stroke="#888"/>
+  <text x="215" y="396" text-anchor="middle" font-size="10" fill="#fff">X-Min</text>
+  <rect x="255" y="375" width="60" height="34" rx="3" fill="#2a2a2a" stroke="#888"/>
+  <text x="285" y="396" text-anchor="middle" font-size="10" fill="#fff">Y-Min</text>
+  <rect x="325" y="375" width="60" height="34" rx="3" fill="#2a2a2a" stroke="#888"/>
+  <text x="355" y="396" text-anchor="middle" font-size="10" fill="#fff">Z-Min</text>
+
+  <!-- Max row -->
+  <rect x="185" y="420" width="60" height="34" rx="3" fill="#2a2a2a" stroke="#888"/>
+  <text x="215" y="441" text-anchor="middle" font-size="10" fill="#fff">X-Max</text>
+  <rect x="255" y="420" width="60" height="34" rx="3" fill="#2a2a2a" stroke="#888"/>
+  <text x="285" y="441" text-anchor="middle" font-size="10" fill="#fff">Y-Max</text>
+  <!-- Z-Max highlighted -->
+  <rect x="325" y="420" width="60" height="34" rx="3" fill="#d9531e" stroke="#fff2e0" stroke-width="2"/>
+  <text x="355" y="441" text-anchor="middle" font-size="10" fill="#fff" font-weight="bold">Z-Max</text>
+
+  <text x="300" y="472" text-anchor="middle" font-size="11" fill="#eafff0">Pin D30 (shared w/ MX3-4)</text>
+
+  <!-- callout line from Z-Max to label -->
+  <line x1="355" y1="454" x2="355" y2="620" stroke="#d9531e" stroke-width="2" stroke-dasharray="5,4"/>
+  <circle cx="355" cy="454" r="4" fill="#d9531e"/>
+
+  <!-- MOTOR-EXT BLOCK -->
+  <rect x="560" y="340" width="230" height="150" rx="6" fill="#0f5c25" stroke="#eafff0" stroke-width="1.5"/>
+  <text x="675" y="360" text-anchor="middle" font-size="14" font-weight="bold" fill="#fff">Motor-Ext (near MCU)</text>
+
+  <!-- MX1 highlighted -->
+  <rect x="580" y="380" width="55" height="90" rx="3" fill="#1a6fb0" stroke="#dff2ff" stroke-width="2"/>
+  <text x="607" y="398" text-anchor="middle" font-size="11" fill="#fff" font-weight="bold">MX1</text>
+  <text x="607" y="415" text-anchor="middle" font-size="9" fill="#dff2ff">pin3=D22</text>
+
+  <rect x="645" y="380" width="55" height="90" rx="3" fill="#2a2a2a" stroke="#888"/>
+  <text x="672" y="398" text-anchor="middle" font-size="11" fill="#fff">MX2</text>
+  <text x="672" y="415" text-anchor="middle" font-size="8" fill="#ccc">(Y-Max</text>
+  <text x="672" y="427" text-anchor="middle" font-size="8" fill="#ccc">shared)</text>
+
+  <rect x="710" y="380" width="55" height="90" rx="3" fill="#2a2a2a" stroke="#888"/>
+  <text x="737" y="398" text-anchor="middle" font-size="11" fill="#fff">MX3</text>
+  <text x="737" y="415" text-anchor="middle" font-size="8" fill="#ccc">(X-Max/</text>
+  <text x="737" y="427" text-anchor="middle" font-size="8" fill="#ccc">Z-Max</text>
+  <text x="737" y="439" text-anchor="middle" font-size="8" fill="#ccc">shared)</text>
+
+  <text x="675" y="482" text-anchor="middle" font-size="11" fill="#eafff0">MX1 pins 1-2-3 = VCC/GND/Signal</text>
+
+  <line x1="607" y1="470" x2="607" y2="620" stroke="#1a6fb0" stroke-width="2" stroke-dasharray="5,4"/>
+  <circle cx="607" cy="470" r="4" fill="#1a6fb0"/>
+
+  <!-- Thermistors -->
+  <rect x="810" y="340" width="70" height="150" rx="4" fill="#3a3a3a" stroke="#111"/>
+  <text x="845" y="360" text-anchor="middle" font-size="11" fill="#fff">Thermis-</text>
+  <text x="845" y="375" text-anchor="middle" font-size="11" fill="#fff">tors</text>
+  <text x="845" y="400" text-anchor="middle" font-size="10" fill="#ccc">T0</text>
+  <text x="845" y="420" text-anchor="middle" font-size="10" fill="#ccc">T1</text>
+  <text x="845" y="440" text-anchor="middle" font-size="10" fill="#ccc">T2</text>
+  <text x="845" y="460" text-anchor="middle" font-size="10" fill="#ccc">T3</text>
+
+  <!-- Motors (bottom) -->
+  <rect x="170" y="600" width="740" height="60" rx="4" fill="#3a3a3a" stroke="#111"/>
+  <text x="540" y="635" text-anchor="middle" font-size="13" fill="#fff">Motors:  X   |   Y   |   Z   |   Z2 (dup. Z connector)   |   Extruder 0   |   Extruder 1</text>
+
+  <!-- ===================== CALLOUT PANELS ===================== -->
+
+  <!-- Z-MAX panel -->
+  <rect x="170" y="700" width="380" height="330" rx="10" fill="#fff3e8" stroke="#d9531e" stroke-width="2.5"/>
+  <text x="360" y="735" text-anchor="middle" font-size="17" font-weight="bold" fill="#a63e12">Z-MAX Endstop Header</text>
+  <text x="360" y="756" text-anchor="middle" font-size="13" fill="#a63e12">BLTouch TRIGGER / ALARM cable (2-pin)</text>
+
+  <!-- connector drawing: 3-pin block -->
+  <rect x="270" y="785" width="180" height="70" rx="6" fill="#222" stroke="#000"/>
+  <rect x="285" y="798" width="30" height="44" rx="3" fill="#666"/>
+  <text x="300" y="825" text-anchor="middle" font-size="11" fill="#fff">S</text>
+  <rect x="330" y="798" width="30" height="44" rx="3" fill="#666"/>
+  <text x="345" y="825" text-anchor="middle" font-size="11" fill="#fff">-</text>
+  <rect x="375" y="798" width="30" height="44" rx="3" fill="#666"/>
+  <text x="390" y="825" text-anchor="middle" font-size="11" fill="#fff">+</text>
+  <text x="300" y="875" text-anchor="middle" font-size="11" fill="#333">Signal</text>
+  <text x="345" y="875" text-anchor="middle" font-size="11" fill="#333">GND</text>
+  <text x="390" y="875" text-anchor="middle" font-size="11" fill="#333">+5V</text>
+  <text x="300" y="893" text-anchor="middle" font-size="10" fill="#666">(White)</text>
+  <text x="345" y="893" text-anchor="middle" font-size="10" fill="#666">(Black)</text>
+  <text x="390" y="893" text-anchor="middle" font-size="10" fill="#666">(n/c)</text>
+
+  <text x="190" y="925" font-size="12" fill="#333" font-weight="bold">Connect:</text>
+  <text x="190" y="945" font-size="12" fill="#333">- BLTouch white wire -&gt; Signal (S)</text>
+  <text x="190" y="963" font-size="12" fill="#333">- BLTouch black wire -&gt; GND (-)</text>
+  <text x="190" y="981" font-size="12" fill="#333">- "+5V" pin: leave unused (2-pin cable)</text>
+  <text x="190" y="1005" font-size="11" fill="#a63e12">Firmware pin: Z_MIN_PROBE_PIN = D30</text>
+
+  <!-- MX1 panel -->
+  <rect x="580" y="700" width="380" height="330" rx="10" fill="#e8f2fb" stroke="#1a6fb0" stroke-width="2.5"/>
+  <text x="770" y="735" text-anchor="middle" font-size="17" font-weight="bold" fill="#0f4a78">MX1 Motor-Ext Header</text>
+  <text x="770" y="756" text-anchor="middle" font-size="13" fill="#0f4a78">BLTouch SERVO / CONTROL cable (3-pin)</text>
+
+  <!-- 5-pin header drawing, only 1-3 used -->
+  <rect x="650" y="785" width="240" height="70" rx="6" fill="#222" stroke="#000"/>
+  <circle cx="680" cy="820" r="12" fill="#d4af37" stroke="#8a6d1a"/>
+  <text x="680" y="824" text-anchor="middle" font-size="10" fill="#000">1</text>
+  <circle cx="725" cy="820" r="12" fill="#d4af37" stroke="#8a6d1a"/>
+  <text x="725" y="824" text-anchor="middle" font-size="10" fill="#000">2</text>
+  <circle cx="770" cy="820" r="12" fill="#d4af37" stroke="#8a6d1a"/>
+  <text x="770" y="824" text-anchor="middle" font-size="10" fill="#000">3</text>
+  <circle cx="815" cy="820" r="10" fill="#555" stroke="#222"/>
+  <text x="815" y="824" text-anchor="middle" font-size="9" fill="#ccc">4</text>
+  <circle cx="860" cy="820" r="10" fill="#555" stroke="#222"/>
+  <text x="860" y="824" text-anchor="middle" font-size="9" fill="#ccc">5</text>
+
+  <text x="680" y="875" text-anchor="middle" font-size="11" fill="#333">VCC</text>
+  <text x="725" y="875" text-anchor="middle" font-size="11" fill="#333">GND</text>
+  <text x="770" y="875" text-anchor="middle" font-size="11" fill="#333">Signal</text>
+  <text x="815" y="875" text-anchor="middle" font-size="10" fill="#888">n/c</text>
+  <text x="860" y="875" text-anchor="middle" font-size="10" fill="#888">n/c</text>
+  <text x="680" y="893" text-anchor="middle" font-size="10" fill="#666">(Red)</text>
+  <text x="725" y="893" text-anchor="middle" font-size="10" fill="#666">(Black)</text>
+  <text x="770" y="893" text-anchor="middle" font-size="10" fill="#666">(Yellow)</text>
+
+  <text x="600" y="925" font-size="12" fill="#333" font-weight="bold">Connect:</text>
+  <text x="600" y="945" font-size="12" fill="#333">- BLTouch red wire -&gt; pin 1 (VCC/+5V)</text>
+  <text x="600" y="963" font-size="12" fill="#333">- BLTouch black/brown wire -&gt; pin 2 (GND)</text>
+  <text x="600" y="981" font-size="12" fill="#333">- BLTouch yellow/orange wire -&gt; pin 3 (Signal)</text>
+  <text x="600" y="1005" font-size="11" fill="#0f4a78">Firmware pin: SERVO0_PIN = D22 (board default)</text>
+
+  <!-- wire color disclaimer -->
+  <text x="550" y="1055" text-anchor="middle" font-size="12" fill="#555">Confirm your specific BLTouch/adapter cable's actual wire colors - kits vary. Function (Signal/GND/VCC) matters, not color.</text>
+
+  <!-- Source table -->
+  <rect x="170" y="1080" width="790" height="160" rx="8" fill="#f5f5f5" stroke="#999"/>
+  <text x="565" y="1108" text-anchor="middle" font-size="14" font-weight="bold" fill="#222">Verified pin mapping (Arduino Mega 2560 digital pin numbers)</text>
+
+  <line x1="190" y1="1122" x2="940" y2="1122" stroke="#999"/>
+  <text x="220" y="1142" font-size="12" font-weight="bold" fill="#222">Function</text>
+  <text x="450" y="1142" font-size="12" font-weight="bold" fill="#222">Arduino Pin</text>
+  <text x="600" y="1142" font-size="12" font-weight="bold" fill="#222">RAMBo Header</text>
+  <text x="800" y="1142" font-size="12" font-weight="bold" fill="#222">Source</text>
+  <line x1="190" y1="1150" x2="940" y2="1150" stroke="#ccc"/>
+
+  <text x="220" y="1172" font-size="12" fill="#333">BLTouch servo/control</text>
+  <text x="450" y="1172" font-size="12" fill="#333">D22 (SERVO0_PIN)</text>
+  <text x="600" y="1172" font-size="12" fill="#333">MX1, pin 3</text>
+  <text x="800" y="1172" font-size="11" fill="#555">pins_RAMBO.h + manual p.49</text>
+
+  <text x="220" y="1194" font-size="12" fill="#333">BLTouch trigger/alarm</text>
+  <text x="450" y="1194" font-size="12" fill="#333">D30 (Z_MIN_PROBE_PIN)</text>
+  <text x="600" y="1194" font-size="12" fill="#333">Z-Max endstop header</text>
+  <text x="800" y="1194" font-size="11" fill="#555">pins_RAMBO.h + manual p.49</text>
+
+  <text x="220" y="1216" font-size="12" fill="#333">Note</text>
+  <text x="450" y="1216" font-size="11" fill="#555" width="480">D30 is shared with "MX3-4" - use the</text>
+  <text x="600" y="1230" font-size="11" fill="#555">dedicated Z-Max 3-pin endstop connector, not the MX3 header.</text>
+
+  <!-- Footer -->
+  <text x="550" y="1270" text-anchor="middle" font-size="12" fill="#777">Sources: RAMBo 1.1B User Manual (UltiMachine / RepRap Electro), p.33 &amp; p.45-49 - and</text>
+  <text x="550" y="1288" text-anchor="middle" font-size="12" fill="#777">taz6-lulzbot_marlin-2x-bltouch/Marlin/src/pins/pins_RAMBO.h (commit 7a05509)</text>
+  <text x="550" y="1310" text-anchor="middle" font-size="13" fill="#b00020" font-weight="bold">Board photo layout is from a RAMBo 1.1B manual - v1.3/1.4 should match, but visually confirm before wiring.</text>
+  <text x="550" y="1330" text-anchor="middle" font-size="13" fill="#b00020" font-weight="bold">Power off before connecting/disconnecting anything. Verify polarity before powering on.</text>
+</svg>
