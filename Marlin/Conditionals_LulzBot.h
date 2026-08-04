@@ -2165,7 +2165,28 @@
 
 /*************************** REWIPE FUNCTIONALITY *******************************/
 
-#if defined(LULZBOT_USE_AUTOLEVELING)
+// Project note (not upstream LulzBot): this entire block is TAZ6-stock
+// behavior for the old electrical bed-washer probe - on any probe point
+// failure, it automatically reheats to 170C, moves to a physical wiper
+// pad, wipes the nozzle, and retries the probe up to
+// LULZBOT_G29_MAX_RETRIES times (G29_RETRY_AND_RECOVER is a real Marlin
+// core feature, but off by default upstream - LulzBot forces it on
+// unconditionally for every printer with autoleveling). Confirmed via a
+// real serial log: this is exactly what was happening when "Level Bed"
+// appeared to "only touch 3 spots, then heat up and go clean the
+// nozzle" - the 4th grid point failed to trigger, which is what kicked
+// off this whole reheat/rewipe/retry sequence (visible in the log as
+// "Error:Autolevel failed" / "//action:probe_rewipe" immediately
+// followed by the hotend target jumping to 170.00). Disabled entirely
+// for LULZBOT_USE_BLTOUCH, by explicit request - falls through to the
+// #else below (same LULZBOT_Z_PROBE_LOW_POINT value the TAZ+Z_SCREW
+// case already used, 0, so no change there), meaning G29 uses Marlin's
+// own bare default behavior: a probe point either succeeds or the whole
+// G29 fails outright with no automatic retry/reheat/rewipe. The
+// underlying reason the probe itself didn't trigger at that point is a
+// separate, real hardware/wiring question, not something this
+// firmware-behavior change fixes - see BLTOUCH_PINOUT.md.
+#if defined(LULZBOT_USE_AUTOLEVELING) && !defined(LULZBOT_USE_BLTOUCH)
     //#define LULZBOT_DEBUG_MACROS // Uncomment to debug macro expansions
 
     #define LULZBOT_G29_RETRY_AND_RECOVER
