@@ -1,7 +1,27 @@
 # BLTouch Pinout Instructions - LulzBot TAZ 6 (RAMBo)
 
-See also: [BLTOUCH_PINOUT_SKETCH.svg](BLTOUCH_PINOUT_SKETCH.svg) - a
-labeled board diagram of the same information below.
+## Images (start here)
+
+- **[BLTOUCH_BOARD_PHOTO_ANNOTATED.png](BLTOUCH_BOARD_PHOTO_ANNOTATED.png)**
+  - the real RAMBo board photo, fully labeled with every connector
+  (mosfets, endstops, motors, thermistors, etc.), with the two BLTouch
+  connectors additionally highlighted in red (Z-MAX) and blue (MX1).
+  Start here for orientation - it shows where these two connectors sit
+  relative to everything else on the board.
+- **[RAMBO_BOARD_FULL_REFERENCE.png](RAMBO_BOARD_FULL_REFERENCE.png)** -
+  the same photo without the BLTouch-specific highlights, for a clean
+  general-purpose reference of every connector on the board.
+- **[MOTOR_EXT_MX1_MX2_MX3_CLOSEUP.png](MOTOR_EXT_MX1_MX2_MX3_CLOSEUP.png)**
+  - a tight macro close-up confirming MX1 is the *leftmost* of the three
+  "Motor Ext" pin columns (MX1/MX2/MX3, left to right).
+- [BLTOUCH_PINOUT_SKETCH.svg](BLTOUCH_PINOUT_SKETCH.svg) - a compact
+  schematic summary (connector-level pin/wire-color tables), useful once
+  you've located the connectors using the photos above.
+
+All three photos are real RAMBo board images (not renders) from
+UltiMachine/RepRap Electro's official RAMBo 1.1B User Manual (credited
+to Thomas Sanladerer / UltiMachine), cropped and re-annotated - see
+"Reference" at the bottom for the exact source and page numbers.
 
 **Status: cross-verified against official docs, still not physically
 confirmed on this printer.** The pin numbers below match both this
@@ -123,4 +143,13 @@ revision.
 - Firmware pin assignment: `Marlin/Conditionals_LulzBot.h`, commit
   `7a05509` ("Add BLTouch support for TAZ 6").
 - Board pin source: `Marlin/src/pins/pins_RAMBO.h`.
+- Board photos: *RAMBo 1.1B User Manual* by RepRap Electro (board
+  designed by UltiMachine), Figure 51 "Main and Auxiliary connectors"
+  (p.45, image by UltiMachine) and Figure 52 "I2C, Serial, SD/SPI,
+  Motor-Ext pins" (p.46, image by Thomas Sanladerer) - cropped and
+  re-annotated with the Z-MAX/MX1 highlights for this project. Pin
+  mapping table cross-checked against the same manual, p.49. Board is
+  1.1B; this printer is v1.3/1.4 - connector layout should match (same
+  design family) but hasn't been visually confirmed against this exact
+  revision.
 - Project background/open questions: `../PROJECT.md`.
