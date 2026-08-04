@@ -5,35 +5,57 @@
 - **[BLTOUCH_BOARD_PHOTO_ANNOTATED.png](BLTOUCH_BOARD_PHOTO_ANNOTATED.png)**
   - the real RAMBo board photo, fully labeled with every connector
   (mosfets, endstops, motors, thermistors, etc.), with the two BLTouch
-  connectors additionally highlighted in red (Z-MAX) and blue (MX1).
-  Start here for orientation - it shows where these two connectors sit
-  relative to everything else on the board.
+  connectors additionally highlighted: Z-MAX (red) and MX1 (blue).
+  Start here for orientation.
 - **[RAMBO_BOARD_FULL_REFERENCE.png](RAMBO_BOARD_FULL_REFERENCE.png)** -
   the same photo without the BLTouch-specific highlights, for a clean
   general-purpose reference of every connector on the board.
 - **[MOTOR_EXT_MX1_MX2_MX3_CLOSEUP.png](MOTOR_EXT_MX1_MX2_MX3_CLOSEUP.png)**
-  - a tight macro close-up confirming MX1 is the *leftmost* of the three
-  "Motor Ext" pin columns (MX1/MX2/MX3, left to right).
-- [BLTOUCH_PINOUT_SKETCH.svg](BLTOUCH_PINOUT_SKETCH.svg) - a compact
-  schematic summary (connector-level pin/wire-color tables), useful once
-  you've located the connectors using the photos above.
+  - a macro close-up of the "Motor Ext 1" header. Important: on this
+  board revision it's a single 5-column x 3-row pin block, not three
+  separate side-by-side headers. **Rows** are MX3 (top), MX2 (middle),
+  MX1 (bottom) - MX1 is the **bottom row**, not a column.
 
-All three photos are real RAMBo board images (not renders) from
-UltiMachine/RepRap Electro's official RAMBo 1.1B User Manual (credited
-to Thomas Sanladerer / UltiMachine), cropped and re-annotated - see
-"Reference" at the bottom for the exact source and page numbers.
+All three images are real RAMBo board photos (not renders), cropped and
+annotated from UltiMachine's official **RAMBo 1.3L manual** - see
+"Reference" at the bottom for the exact source.
 
-**Status: cross-verified against official docs, still not physically
-confirmed on this printer.** The pin numbers below match both this
-repo's firmware (`Marlin/Conditionals_LulzBot.h`, commit `7a05509`)
-*and* UltiMachine/RepRap Electro's own RAMBo 1.1B User Manual (pin
-mapping table, p.49 - `D22 = MX1-3`, `D30 = Z-Max/MX3-4`), so the pin
-numbers themselves are solid. What's still unconfirmed is purely
-physical: whether *this specific* v1.3/1.4 board's silkscreen still
-labels these headers "MX1"/"Z-MAX" the same way, and whether the actual
-BLTouch has been wired to match. Verify both with a multimeter and the
-bring-up checklist below before trusting it near the bed. Do not home or
-probe on real hardware until it's confirmed.
+## Corrected from an earlier version of this doc
+
+An earlier version of this document and its images were built from the
+**RAMBo 1.1B manual** - the wrong board revision. On 1.1B, "Motor Ext" is
+three separate side-by-side 5-pin headers (MX1/MX2/MX3 as columns), and
+that manual's prose text claimed pin 1 = VCC, pin 2 = GND. Neither of
+those is correct for this printer's actual board:
+
+- This is a **RAMBo v1.3/1.4** board. Its "Motor Ext 1" header is a
+  single 5x3 pin block where MX1/MX2/MX3 are **rows**, not separate
+  headers - confirmed both from a real board photo and from the
+  schematic in UltiMachine's own **RAMBo 1.3L manual**.
+- **Pin 1 = GND, pin 2 = VCC** (not the other way around) - confirmed by
+  two independent schematics (the 1.3L manual's "Motor Extensions"
+  block, and the 1.1B manual's own schematic diagram, which contradicts
+  that same manual's prose text). The physical board photo's "-" / "+"
+  silkscreen markings under the MX1 row also line up with GND-then-VCC
+  reading left to right.
+
+If you saved or printed the earlier version of this doc, discard it -
+the pin *numbers* (D22, D30) were always correct (they come from this
+repo's own firmware source, cross-checked independently), only the
+physical layout and VCC/GND ordering were wrong.
+
+## Status
+
+**Board-revision-correct, still not physically confirmed on this
+specific printer.** The images and pin mapping below are now sourced
+from a RAMBo v1.3-family manual (matching this printer's actual board
+family per `PROJECT.md`'s "v1.3 or v1.4" note), not a mismatched
+revision. What's still unconfirmed: whether *this exact* board is 1.3
+vs. 1.4 (should be electrically identical for this purpose, but not
+visually confirmed), and whether the physical BLTouch has actually been
+wired to match. Verify with a multimeter and the bring-up checklist
+below before trusting it near the bed. Do not home or probe on real
+hardware until it's confirmed.
 
 ## Safety first
 
@@ -62,24 +84,26 @@ probe on real hardware until it's confirmed.
 
 | BLTouch cable | BLTouch wires (typical) | Connects to | RAMBo pin | Function in firmware |
 |---|---|---|---|---|
-| 3-pin servo/control | Red = +5V, Black/Brown = GND, Yellow/Orange = Signal | **"MX1" motor header** | `SERVO0_PIN`, Arduino digital pin **22** | Drives the BLTouch's PWM deploy/stow command. Board default in `pins_RAMBO.h` - not reassigned in firmware. |
+| 3-pin servo/control | Black/Brown = GND, Red = +5V, Yellow/Orange = Signal | **MX1 row** (bottom row of the "Motor Ext 1" block), pins 1-2-3 left to right | `SERVO0_PIN`, Arduino digital pin **22** (pin 3 of the row) | Drives the BLTouch's PWM deploy/stow command. Board default in `pins_RAMBO.h` - not reassigned in firmware. |
 | 2-pin sensor/trigger | White = Signal, Black = GND | **Z-MAX endstop header** | `Z_MIN_PROBE_PIN`, Arduino digital pin **30** | Reads the BLTouch's trigger/alarm signal when the probe touches down. Repurposed in firmware from the (unused) Z-max endstop. |
 
+MX1 row pin order, left to right: **1 = GND, 2 = VCC, 3 = Signal (D22),
+4 = unused, 5 = unused.** Only use the first 3 pins.
+
 Confirm the exact wire colors against the adapter cable you actually
-have - kits vary. The "MX1" and "Z-MAX" header names and pin numbers
-are cross-verified against UltiMachine's official RAMBo 1.1B User
-Manual (pin mapping table, p.49) in addition to `pins_RAMBO.h` - but
-still confirm the header *positions* against your physical v1.3/1.4
-board's silkscreen, since the manual's board photo is from the 1.1B
-revision.
+have - kits vary. The pin *numbers* (D22, D30) are cross-verified
+against UltiMachine's RAMBo 1.3L manual schematic in addition to
+`pins_RAMBO.h` - but still confirm the header *position* against your
+physical board's silkscreen, since minor layout details can still vary
+between 1.3 and 1.4.
 
 ## Two things to check before connecting
 
-1. **The MX1 header may already be in use.** Stock (non-BLTouch) TAZ 6
-   firmware uses this exact header (`SERVO0_PIN`) as the *input* signal
-   for the old electrical bed-washer probe (`LULZBOT_BED_WASHERS_PIN`).
-   If that wiring is still connected, disconnect it first - the BLTouch
-   needs this header as a PWM *output*, and the two uses conflict
+1. **The MX1 row may already be in use.** Stock (non-BLTouch) TAZ 6
+   firmware uses this exact pin (`SERVO0_PIN`) as the *input* signal for
+   the old electrical bed-washer probe (`LULZBOT_BED_WASHERS_PIN`). If
+   that wiring is still connected, disconnect it first - the BLTouch
+   needs this pin as a PWM *output*, and the two uses conflict
    electrically.
 2. **The Z-MAX header should be free.** TAZ 6 homes Z using a home
    button + probe, not a mechanical Z-max switch, so stock firmware
@@ -127,7 +151,7 @@ revision.
 
 - **BLTouch LED solid red, never blinks / no self-test on power-up**:
   check the 3-pin servo/control cable's polarity and that it's on the
-  MX1 header, not still on the old bed-washer probe wiring.
+  MX1 row, not still on the old bed-washer probe wiring.
 - **BLTouch deploys but G28/G29 never detects a trigger**: check the
   2-pin sensor cable is on the Z-MAX header and its polarity - Marlin's
   BLTouch auto-configuration handles endstop-inverting/pullups
@@ -143,13 +167,12 @@ revision.
 - Firmware pin assignment: `Marlin/Conditionals_LulzBot.h`, commit
   `7a05509` ("Add BLTouch support for TAZ 6").
 - Board pin source: `Marlin/src/pins/pins_RAMBO.h`.
-- Board photos: *RAMBo 1.1B User Manual* by RepRap Electro (board
-  designed by UltiMachine), Figure 51 "Main and Auxiliary connectors"
-  (p.45, image by UltiMachine) and Figure 52 "I2C, Serial, SD/SPI,
-  Motor-Ext pins" (p.46, image by Thomas Sanladerer) - cropped and
-  re-annotated with the Z-MAX/MX1 highlights for this project. Pin
-  mapping table cross-checked against the same manual, p.49. Board is
-  1.1B; this printer is v1.3/1.4 - connector layout should match (same
-  design family) but hasn't been visually confirmed against this exact
-  revision.
+- Board photos and pin mapping: *RAMBo 1.3L* connector diagram and
+  schematic ("RAMBo-connectors.ai" / `RAMBo-manual.pdf`), downloaded
+  from LulzBot's own TAZ 6 production-parts documentation:
+  `download.lulzbot.com/TAZ/6.02/production_parts/electronics/RAMBo/docs/RAMBo-manual.pdf`.
+  Board design and document copyright 2014 UltiMachine (Johnny, Britt,
+  Dorothy, Lee, Bruce). Page 1 (main connectors photo) and page 3
+  ("Motor Extensions" schematic block) were cropped and re-annotated
+  with the Z-MAX/MX1 highlights for this project.
 - Project background/open questions: `../PROJECT.md`.
