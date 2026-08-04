@@ -830,23 +830,43 @@
 #endif
 
 #if defined(LULZBOT_USE_BLTOUCH) && defined(LULZBOT_TAZ_BED)
-    // Project fix (not upstream LulzBot): the stock BACK grid boundary
-    // above (291) was set assuming a zero probe offset. With the
-    // BLTouch's real measured offset now applied (46mm *in front of*
-    // the nozzle - see LULZBOT_Y_PROBE_OFFSET_FROM_EXTRUDER below),
-    // reaching that back-right grid corner with the probe would require
-    // the NOZZLE to travel to Y=291-(-46)=337mm - beyond this printer's
-    // actual Y_MAX_POS of 303mm. G29 checks exactly this reachability
-    // for the grid's corners before probing anything (G29.cpp), and
-    // silently aborts with "? (L,R,F,B) out of bounds." on the serial
-    // console if it fails - from the LCD this looks exactly like G29
-    // did nothing after G28's homing move, which is what led to finding
-    // this. Pulled the back boundary in to 250 (comfortably within the
-    // reachable 257mm ceiling = 303 - 46, leaving a small margin for
-    // calibration slop) so the 5x5 grid actually probes instead of
-    // aborting immediately.
+    // Project fix (not upstream LulzBot): the stock grid boundaries
+    // above (LEFT -10, RIGHT 288, FRONT -9, BACK 291) are TAZ6-stock
+    // values tuned for the old electrical bed-washer probe, whose
+    // corner "washers" are physically mounted just OUTSIDE the actual
+    // print surface (the bed's real coordinate extent is X=[0,280],
+    // Y=[0,280] - X_BED_SIZE/Y_BED_SIZE are both 280, no
+    // BED_CENTER_AT_0_0). LEFT=-10 and FRONT=-9 are themselves already
+    // off the physical bed (negative, before the bed's own X=0/Y=0
+    // origin) - fine for a probe aimed at an external corner washer,
+    // but Marlin always places the *probe* exactly at these target
+    // coordinates (see home_z_safely()/probe_pt()), so a BLTouch aimed
+    // at (-10,-9) ends up physically hanging off the edge of the bed on
+    // its first grid point - confirmed by watching this happen on real
+    // hardware. Also, with the BLTouch's real measured offset applied
+    // (46mm *in front of* the nozzle), reaching the old BACK boundary
+    // (291) would require the nozzle to travel to Y=291-(-46)=337mm -
+    // beyond this printer's actual Y_MAX_POS of 303mm, which made G29
+    // abort instantly on its own reachability check before probing
+    // anything (see G29.cpp's "? (L,R,F,B) out of bounds." check) -
+    // from the LCD that looked exactly like G29 did nothing after G28.
+    //
+    // Replaced with a simple, stock-BLTouch-style margin inset from the
+    // bed's own real extent (0..280 each axis) instead of the old
+    // washer-corner positions - LEFT/FRONT pulled in to 10 (comfortably
+    // on-bed, on-axis reachability isn't a binding constraint given the
+    // small 4mm X offset and the Y offset making the front easier, not
+    // harder, to reach), RIGHT pulled in to 270, BACK pulled in to 245
+    // (within the reachable 257mm ceiling = 303 - 46, with a bit more
+    // margin than the previous 250 for calibration slop).
+    #undef  LULZBOT_STANDARD_LEFT_PROBE_BED_POSITION
+    #undef  LULZBOT_STANDARD_RIGHT_PROBE_BED_POSITION
+    #undef  LULZBOT_STANDARD_FRONT_PROBE_BED_POSITION
     #undef  LULZBOT_STANDARD_BACK_PROBE_BED_POSITION
-    #define LULZBOT_STANDARD_BACK_PROBE_BED_POSITION      250
+    #define LULZBOT_STANDARD_LEFT_PROBE_BED_POSITION       10
+    #define LULZBOT_STANDARD_RIGHT_PROBE_BED_POSITION     270
+    #define LULZBOT_STANDARD_FRONT_PROBE_BED_POSITION      10
+    #define LULZBOT_STANDARD_BACK_PROBE_BED_POSITION      245
 #endif
 
 #if defined(LULZBOT_USE_AUTOLEVELING)
