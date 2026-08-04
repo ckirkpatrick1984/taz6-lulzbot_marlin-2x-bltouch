@@ -165,6 +165,26 @@ between 1.3 and 1.4.
 
 ## Troubleshooting
 
+- **"Level Bed" touches a few grid points, then heats to 170C and wipes
+  the nozzle before continuing/failing**: fixed in commit `097c531` -
+  this is `LULZBOT_G29_RETRY_AND_RECOVER`, a TAZ6-stock feature
+  (confirmed via a real serial log: `Error:Autolevel failed` /
+  `//action:probe_rewipe` right after the hotend target jumped to
+  170.00) that automatically reheats, wipes the nozzle against a
+  physical wiper pad, and retries the whole grid up to twice on any
+  probe point failure - all tuned for the old electrical bed-washer
+  probe, not a BLTouch. Disabled entirely for the BLTouch build; G29
+  now just fails outright on a bad point instead of masking it with a
+  retry dance.
+  - **Important**: this fix makes the failure *visible* again, it
+    doesn't explain *why* a probe point failed to trigger in the first
+    place. That's a real hardware question - if a specific grid point
+    keeps failing, check: the BLTouch's trigger wire/connection isn't
+    loose or intermittent, the pin isn't binding/sticking mechanically
+    at that Z depth, and the bed is physically level enough at that
+    spot that the probe reaches trigger range before hitting
+    `Z_PROBE_LOW_POINT`. Not something reflashing alone will fix if it
+    recurs.
 - **First G29 grid point lands off the physical bed**: fixed in commit
   `50f1884`. Not a probe-offset sign error (checked, and flipping it
   would have made things worse) - the grid's LEFT/FRONT corner targets
