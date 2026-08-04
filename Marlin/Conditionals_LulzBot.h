@@ -680,52 +680,44 @@
     #define LULZBOT_Z_MIN_USES_Z_PROBE_ENABLED
     #define LULZBOT_Z_MIN_PROBE_PIN LULZBOT_BED_WASHERS_PIN
 
-#elif defined(LULZBOT_USE_BLTOUCH)
-    // Project addition (not upstream LulzBot): the stock electrical
-    // bed-washer probe above (LULZBOT_BED_WASHERS_PIN = SERVO0_PIN,
-    // pin 22, RAMBo "Motor header MX1") has been replaced with a
-    // BLTouch. SERVO0_PIN itself is left at its board default (pin 22)
-    // since that's the pin Marlin's servo code actually drives for the
-    // BLTouch's PWM deploy/stow control line - pins_RAMBO.h defines
-    // SERVO0_PIN unconditionally and loads after this file, so an
-    // override here would just be silently clobbered. The BLTouch's
-    // separate trigger/alarm signal line therefore needs a different
-    // pin: the physical Z-max pin (30) is otherwise unused on this
-    // printer (LULZBOT_USE_ZMAX_PLUG isn't set when
-    // LULZBOT_USE_HOME_BUTTON is defined - see below), so it's
-    // repurposed here, mirroring how the Mini 1 BLTouch build reused
-    // its own freed Z-max pin.
-    //
-    // Deliberately the literal number 30, NOT the Z_MAX_PIN symbol:
-    // Marlin/src/pins/pins.h unconditionally does
-    // "#if DISABLED(USE_ZMAX_PLUG) #undef Z_MAX_PIN #define Z_MAX_PIN -1"
-    // to null out unused endstop pins, which would silently clobber a
-    // reference to the Z_MAX_PIN macro itself (confirmed by compiling -
-    // this was the actual cause of a "Z_MIN_PROBE_PIN must be defined"
-    // build failure before switching to the raw number).
-    //
-    // TODO(hardware): UNCONFIRMED. This printer's BLTouch wiring has
-    // not been physically verified. Before ever flashing, homing, or
-    // probing on real hardware, confirm the trigger/alarm wire is
-    // actually on pin 30 and the servo/control wire is actually on
-    // pin 22 (SERVO0_PIN) - if the real wiring differs, both this
-    // define and the physical connections need to be reconciled first.
-    #define LULZBOT_Z_MIN_USES_Z_PROBE_ENABLED
-    #define LULZBOT_Z_MIN_PROBE_PIN 30
-
 #else
+    // Project note (not upstream LulzBot): this also now covers TAZ 6
+    // with BLTouch. The stock electrical bed-washer probe AND the
+    // mechanical Z-Home button (both above, tied to
+    // LULZBOT_USE_HOME_BUTTON) have been physically removed and
+    // replaced by a single BLTouch that is the sole Z reference for
+    // both homing and probing - by explicit request, not using any of
+    // the old home-button/bed-washer pin indirection (SERVO0_PIN as a
+    // probe input, or a repurposed Z-max pin). Instead this falls
+    // through to the same plain Z_MIN-endstop-as-probe path the Mini
+    // and TAZ Pro already use below, exactly as if this printer had no
+    // home button at all: the BLTouch's trigger/alarm line goes on the
+    // physical Z-MIN header, nothing is wired to Z-MAX.
+    //
     // The Mini and TAZ Pro lack a home button and probe using the Z_MIN pin.
     #define LULZBOT_Z_MIN_PROBE_USES_Z_MIN_ENDSTOP_PIN
 #endif
 
 // Only the TAZ 6 has a Z-homing button
-#if defined(LULZBOT_USE_HOME_BUTTON)
+#if defined(LULZBOT_USE_HOME_BUTTON) && !defined(LULZBOT_USE_BLTOUCH)
     #define LULZBOT_Z_SAFE_HOMING
     #define LULZBOT_Z_SAFE_HOMING_X_POINT         (-19)
     #define LULZBOT_Z_SAFE_HOMING_Y_POINT         (258)
     #define LULZBOT_Z_HOMING_HEIGHT               5
 
     #define LULZBOT_HOMING_USES_PROBE_PINS
+#elif defined(LULZBOT_USE_HOME_BUTTON) && defined(LULZBOT_USE_BLTOUCH)
+    // Project note: the physical home button is gone on this build (see
+    // the Z_MIN_PROBE_PIN block above), but Z still needs to home down
+    // via the BLTouch probe, so Z_SAFE_HOMING is still required (XY must
+    // be at a safe, reachable point over the bed before Z homes). Same
+    // X/Y point inherited from the old home-button config as a starting
+    // placeholder - TODO(hardware): not yet re-verified for BLTouch
+    // probe clearance specifically.
+    #define LULZBOT_Z_SAFE_HOMING
+    #define LULZBOT_Z_SAFE_HOMING_X_POINT         (-19)
+    #define LULZBOT_Z_SAFE_HOMING_Y_POINT         (258)
+    #define LULZBOT_Z_HOMING_HEIGHT               5
 #elif defined(LULZBOT_Juniper_TAZ5)
     // TAZ 5 safe homing position so fan duct does not hit.
     #define LULZBOT_Z_SAFE_HOMING
@@ -738,10 +730,15 @@
 #endif  // LULZBOT_USE_HOME_BUTTON
 
 #if defined(LULZBOT_USE_HOME_BUTTON) || defined(LULZBOT_SENSORLESS_HOMING) || defined(LULZBOT_ENDSTOPS_ALWAYS_ON_DEFAULT)
-    #if defined(LULZBOT_USE_HOME_BUTTON)
+    #if defined(LULZBOT_USE_HOME_BUTTON) && !defined(LULZBOT_USE_BLTOUCH)
         /* On a TAZ, we need to raise the print head after homing to clear the button */
         #define LULZBOT_HOMING_BACKOFF_MM   {0, 0, 16}
     #else
+        /* Project note: also covers TAZ 6 with BLTouch - there's no
+         * physical button to clear anymore (see the Z_MIN_PROBE_PIN
+         * block above), so use the same small anti-chatter backoff as
+         * the sensorless-homing case instead of the old button-clearing
+         * 16mm raise. */
         /* Leaving the toolhead resting on the endstops with sensorless homing
          * will likely cause chatter if the machine is immediately re-homed, so
          * don't leave the head sitting on the endstops after homing. */
