@@ -2179,13 +2179,26 @@
 // "Error:Autolevel failed" / "//action:probe_rewipe" immediately
 // followed by the hotend target jumping to 170.00). Disabled entirely
 // for LULZBOT_USE_BLTOUCH, by explicit request - falls through to the
-// #else below (same LULZBOT_Z_PROBE_LOW_POINT value the TAZ+Z_SCREW
-// case already used, 0, so no change there), meaning G29 uses Marlin's
-// own bare default behavior: a probe point either succeeds or the whole
-// G29 fails outright with no automatic retry/reheat/rewipe. The
-// underlying reason the probe itself didn't trigger at that point is a
-// separate, real hardware/wiring question, not something this
-// firmware-behavior change fixes - see BLTOUCH_PINOUT.md.
+// #else below, meaning G29 uses Marlin's own bare default behavior: a
+// probe point either succeeds or the whole G29 fails outright with no
+// automatic retry/reheat/rewipe.
+//
+// The #else branch's LULZBOT_Z_PROBE_LOW_POINT is a separate,
+// unrelated value that controls something different: how far past the
+// expected trigger point (probe.cpp's run_z_probe(), z_probe_low_point
+// = -Z_PROBE_OFFSET_FROM_EXTRUDER + Z_PROBE_LOW_POINT) the probe is
+// allowed to travel before giving up and returning NAN ("Autolevel
+// failed") for that point - a real per-point failure, not related to
+// the rewipe/retry machinery above. TAZ+Z_SCREW's value of 0 was tuned
+// for the old bed-washer probe, which had a precisely known trigger
+// height; it left only ~1mm of margin here given this build's still-
+// unmeasured placeholder LULZBOT_Z_PROBE_OFFSET_FROM_EXTRUDER (-1.0),
+// which is too tight for a BLTouch on an as-yet-uncalibrated bed and
+// was confirmed to be the cause of "fails at a different grid point on
+// each printer" - real per-printer bed deviation exceeding that 1mm
+// window at different locations. Set to Marlin's own stock default
+// (Conditionals_LCD.h's #ifndef Z_PROBE_LOW_POINT fallback, -5) for
+// LULZBOT_USE_BLTOUCH instead, giving a full 6mm of search margin.
 #if defined(LULZBOT_USE_AUTOLEVELING) && !defined(LULZBOT_USE_BLTOUCH)
     //#define LULZBOT_DEBUG_MACROS // Uncomment to debug macro expansions
 
@@ -2292,7 +2305,7 @@
         #error Dump complete
     #endif
 #else
-    #define LULZBOT_Z_PROBE_LOW_POINT    0
+    #define LULZBOT_Z_PROBE_LOW_POINT   -5
 #endif
 
 /******************************** PROBE QUALITY CHECK *************************/
