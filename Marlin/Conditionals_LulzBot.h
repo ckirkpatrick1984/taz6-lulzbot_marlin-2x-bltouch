@@ -946,11 +946,17 @@
     // an undefined array size.
     #define LULZBOT_NUM_SERVOS                     1
     #define LULZBOT_SERVO_DELAY                  { 50 }
-    // TODO(hardware): -1.200 (the stock TAZ 6 default) is calibrated
-    // for the electrical bed-washer probe's trigger height, not a
-    // BLTouch's. This placeholder MUST be replaced with a real G29/M851
-    // measurement on the actual printer before trusting a print.
-    #define LULZBOT_Z_PROBE_OFFSET_FROM_EXTRUDER -1.0
+    // User-measured: the BLTouch pin, fully extended, sits 3mm below
+    // the nozzle tip - so the probe triggers before the nozzle would
+    // reach the bed, which is the whole point of the offset (Z offset
+    // is negative when the probe is below the nozzle, per the sign
+    // convention in Configuration.h). Replaces the old -1.0 stock TAZ 6
+    // placeholder, which was calibrated for the electrical bed-washer
+    // probe's trigger height, not a BLTouch's.
+    // TODO(hardware): not yet flash-tested/fine-tuned via M851 on real
+    // hardware - the 3mm mechanical measurement is a starting point,
+    // not a substitute for the standard paper-test/M851 calibration.
+    #define LULZBOT_Z_PROBE_OFFSET_FROM_EXTRUDER -3.0
     // User-measured BLTouch-to-nozzle offset: BLTouch is ~3.7mm left of
     // and ~46.4mm in front of the nozzle (facing the printer's front).
     // X_PROBE_OFFSET_FROM_EXTRUDER is "-left +right", Y is "-front
@@ -2189,16 +2195,18 @@
 // = -Z_PROBE_OFFSET_FROM_EXTRUDER + Z_PROBE_LOW_POINT) the probe is
 // allowed to travel before giving up and returning NAN ("Autolevel
 // failed") for that point - a real per-point failure, not related to
-// the rewipe/retry machinery above. TAZ+Z_SCREW's value of 0 was tuned
-// for the old bed-washer probe, which had a precisely known trigger
-// height; it left only ~1mm of margin here given this build's still-
-// unmeasured placeholder LULZBOT_Z_PROBE_OFFSET_FROM_EXTRUDER (-1.0),
-// which is too tight for a BLTouch on an as-yet-uncalibrated bed and
-// was confirmed to be the cause of "fails at a different grid point on
-// each printer" - real per-printer bed deviation exceeding that 1mm
-// window at different locations. Set to Marlin's own stock default
-// (Conditionals_LCD.h's #ifndef Z_PROBE_LOW_POINT fallback, -5) for
-// LULZBOT_USE_BLTOUCH instead, giving a full 6mm of search margin.
+// the rewipe/retry machinery above. Since Z_PROBE_LOW_POINT is added
+// directly onto the expected-trigger Z, its magnitude IS the search
+// margin below that expected point, regardless of what the offset
+// itself is set to. TAZ+Z_SCREW's value of 0 was tuned for the old
+// bed-washer probe, which had a precisely known trigger height - it
+// left zero margin here, which was too tight for a BLTouch on an
+// as-yet-uncalibrated bed and was confirmed to be the cause of "fails
+// at a different grid point on each printer" (real per-printer bed
+// deviation exceeding that zero-margin window at different locations).
+// Set to Marlin's own stock default (Conditionals_LCD.h's #ifndef
+// Z_PROBE_LOW_POINT fallback, -5) for LULZBOT_USE_BLTOUCH instead,
+// giving 5mm of search margin past the expected trigger point.
 #if defined(LULZBOT_USE_AUTOLEVELING) && !defined(LULZBOT_USE_BLTOUCH)
     //#define LULZBOT_DEBUG_MACROS // Uncomment to debug macro expansions
 
