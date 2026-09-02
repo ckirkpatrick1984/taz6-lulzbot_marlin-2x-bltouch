@@ -973,17 +973,18 @@
     // hardware.
     #define LULZBOT_X_PROBE_OFFSET_FROM_EXTRUDER -4
     #define LULZBOT_Y_PROBE_OFFSET_FROM_EXTRUDER -46
-    // The stock -2 lower bound was sized for the bed-washer probe's
-    // shallow trigger height and is narrower than the BLTouch's own
-    // -3.0 offset, so M851 would reject "M851 Z-3.0" outright
-    // ("?Z out of range", M851.cpp) and the LCD Z-offset menu would
-    // clamp to -2 - i.e. the paper-test calibration this offset still
-    // needs could never actually be dialled in. Widened to -5, matching
-    // mini1-marlin-2x, which hit this same wall with the same -3.0
-    // measurement. Marlin's own default here is much wider still
-    // (-20/+20, Conditionals_post.h); -5 keeps a sane guardrail while
-    // leaving room to tune.
-    #define LULZBOT_Z_PROBE_OFFSET_RANGE_MIN     -5
+    // These bounds are what M851 and the LCD Z-offset menu will accept -
+    // they are an input guardrail, not a safety mechanism, and the stock
+    // -2/+5 pair was sized for the bed-washer probe's shallow trigger
+    // height. That is narrower than this BLTouch needs: M851 rejected
+    // anything past -2 ("?Z out of range", M851.cpp) and the LCD menu
+    // clamped there, so the offset could not be dialled in at all on
+    // hardware. Set to Marlin's own stock values (-20/+20, from
+    // Conditionals_post.h) rather than a guessed-at narrower pair, since
+    // the correct offset is still being determined by paper test and any
+    // self-imposed limit risks blocking it again.
+    #define LULZBOT_Z_PROBE_OFFSET_RANGE_MIN    -20
+    #define LULZBOT_Z_PROBE_OFFSET_RANGE_MAX     20
 #endif // LULZBOT_USE_BLTOUCH
 
 #define LULZBOT_MULTIPLE_PROBING              2
@@ -1000,7 +1001,9 @@
 #if !defined(LULZBOT_Z_PROBE_OFFSET_RANGE_MIN)
     #define LULZBOT_Z_PROBE_OFFSET_RANGE_MIN  -2
 #endif
-#define LULZBOT_Z_PROBE_OFFSET_RANGE_MAX      5
+#if !defined(LULZBOT_Z_PROBE_OFFSET_RANGE_MAX)
+    #define LULZBOT_Z_PROBE_OFFSET_RANGE_MAX   5
+#endif
 #define LULZBOT_XY_PROBE_SPEED                6000
 #define LULZBOT_Z_PROBE_SPEED_SLOW           (1*60)
 #if defined(LULZBOT_USE_Z_BELT)
