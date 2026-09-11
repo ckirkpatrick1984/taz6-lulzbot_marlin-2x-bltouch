@@ -1,5 +1,7 @@
 .pioenvs/
 .piolibdeps/
 .pio/
-firmware.hex
+# The built firmware.hex at the repo root is intentionally TRACKED so it
+# can be downloaded and flashed directly from GitHub. Build output under
+# .pioenvs/ stays ignored via the rule above.
 .DS_Store

@@ -60,35 +60,76 @@ instead: `TOOLHEAD_CecropiaSilk_SingleExtruderAeroV2`, the non-prototype
 universal SE/Aero toolhead (same E3D Titan Aero V6 block), already used
 on the Workhorse build.
 
+## Prebuilt firmware
+
+A ready-to-flash **`firmware.hex`** is committed at the repo root, built
+from the current `master` with `LULZBOT_USE_BLTOUCH` enabled
+(`python3 -m platformio run -e rambo`; Flash 65.2%, RAM 68.5%).
+
+**Read this before flashing it to your printer.** This build is not a
+drop-in for a stock TAZ 6. It assumes a specific, physically modified
+machine:
+
+- **The mechanical Z-home button has been physically removed.** The
+  BLTouch is the *sole* Z reference for both homing and probing. On a
+  stock TAZ 6 that still has its home button, this firmware is not
+  appropriate.
+- **BLTouch wiring must match** `BLTOUCH_PINOUT.md`: trigger/sensor on
+  `Z_MIN_PIN` (Arduino digital pin **10**, the Z-Min endstop header), and
+  servo/control on `SERVO0_PIN` (pin **22**, the RAMBo MX1 row).
+- **Toolhead is a non-stock Titan Aero**, configured as
+  `TOOLHEAD_CecropiaSilk_SingleExtruderAeroV2`.
+- **Probe offsets are specific to this BLTouch mount**: X `-4`, Y `-46`
+  (measured 3.7 mm left / 46.4 mm in front, rounded - the 1.x/2.0 fork
+  requires integers). Your mount will almost certainly differ.
+- **The Z probe offset (`-3.0`) is a ruler measurement, not a calibrated
+  one.** It has not yet been dialled in with an `M851` paper test, so
+  first-layer height will need tuning on any machine.
+
+If you flash this, **verify `M119` shows the probe actually toggling
+before running `G28`** - an unconnected or miswired probe reads as
+"never triggered," and Z homing will then drive the nozzle into the bed.
+
+After flashing, run **`M502` then `M500`** to load and save the compiled
+defaults. EEPROM values (probe offset, PID, steps/mm, mesh) survive a
+flash and will otherwise silently shadow the firmware's settings.
+
+To build it yourself instead, comment out `LULZBOT_USE_BLTOUCH` in
+`Marlin/Configuration_LulzBot.h` for the stock configuration (Flash
+63.9%, RAM 66.1%), or leave it enabled for the BLTouch build.
+
 ## Current state
 
 Printer model and toolhead are selected in `Marlin/Configuration_LulzBot.h`
-(`LULZBOT_Oliveoil_TAZ6` / `TOOLHEAD_CecropiaSilk_SingleExtruderAeroV2`,
-commit `2d4b3d0`) and **build-verified**: `pio run -e rambo` succeeds,
-`firmware.hex` produced (Flash 63.6%, RAM 66.1%). That commit also fixed
-two `platformio.ini` tooling issues unrelated to the config selection
-(dead `trinamic/TMC26XStepper` GitHub link, old numeric `lib_ldf_mode`
-value) - the same fixes already applied in `mini1-marlin-2x/`.
+(`LULZBOT_Oliveoil_TAZ6` / `TOOLHEAD_CecropiaSilk_SingleExtruderAeroV2`)
+and build-verified both ways: BLTouch enabled (Flash 65.2%, RAM 68.5%)
+and stock/disabled (Flash 63.9%, RAM 66.1%).
 
-BLTouch config has been added (commit `7a05509`), gated behind
-`LULZBOT_USE_BLTOUCH` in `Configuration_LulzBot.h` so the stock config
-remains buildable by commenting that flag out. Build-verified both ways:
-BLTouch enabled (Flash 64.5%, RAM 68.4%) and stock/disabled (Flash 63.6%,
-RAM 66.1%, matching the prior stock-only build exactly).
+**BLTouch probing and a full LCD-menu `G29` are confirmed working on real
+hardware**, which retroactively validates the pin 10 / pin 22 wiring
+documented in `BLTOUCH_PINOUT.md`.
 
-**Not flash-tested on real hardware.** The BLTouch's trigger/alarm wire
-is mapped to pin 30 (this printer's physical Z-max pin, otherwise
-unused) and its servo/control wire to pin 22 (`SERVO0_PIN`, the RAMBo
-board default) - this pin assignment is an **unconfirmed placeholder**,
-not verified against the actual physical wiring. Also left as explicit
-hardware-calibration TODOs: Z probe offset (-1.0 placeholder, stock
--1.200 was calibrated for the bed-washer probe), X/Y probe offset (0,0,
-unconfirmed for the BLTouch mount), and the Z-safe-homing point
-(inherited -19/258 from the old home button, not re-verified for probe
-clearance). See commit `7a05509`'s message for the full technical
-rationale, and the umbrella `PROJECT.md` in the `lulzbot-marlin-bltouch`
-workspace folder for goals, background, and open questions across all
-repos in this fleet.
+Configuration reached its current state by removing the stock TAZ 6
+bed-leveling behavior, which was built around the electrical bed-washer
+probe (where the nozzle itself was the probe) and is wrong for a BLTouch:
+
+- `G29_RETRY_AND_RECOVER` (reheat / wipe / retry) - disabled entirely
+- Probe grid boundaries moved onto the physical bed (`10`/`270`/`10`/`245`);
+  all four stock values sat on external washers, some off the bed
+- `Z_SAFE_HOMING` moved from the old home-button position (`-19`, `258`)
+  to bed center (`X_CENTER`, `Y_CENTER`), matching Marlin's own default
+- `Z_PROBE_LOW_POINT` restored to Marlin's stock `-5` (was `0`, leaving no
+  search margin past the expected trigger height)
+- `Z_PROBE_OFFSET_RANGE_MIN`/`MAX` restored to Marlin's stock `-20`/`20`
+  (was `-2`/`5`, which made `M851` reject the offset needed here)
+- `BLTOUCH_FORCE_SW_MODE` enabled, so the probe holds its trigger output
+  rather than pulsing ~10 ms - this fork has no `ENDSTOP_INTERRUPTS_FEATURE`,
+  so endstops are polled and a short pulse can be missed
+
+Remaining hardware-calibration TODO: the Z probe offset paper test
+(`M851` + `M500`). See the umbrella `PROJECT.md` in the
+`lulzbot-marlin-bltouch` workspace folder for goals, background, and open
+questions across all repos in this fleet.
 
 # Safety and warnings:
 
